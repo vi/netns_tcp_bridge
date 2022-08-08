@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.59"
+anyhow = { version = "1.0.59" }
 either = "1.7.0"
 flume = { version = "0.10.14", default-features = false, features=["async"]}
 gumdrop = "0.8.1"

@@ -253,7 +253,7 @@ impl OptsPart {
         }
 
         if let Some(ns) = self.ns {
-            setns(ns.0, CloneFlags::CLONE_NEWNS)?;
+            setns(ns.0, CloneFlags::CLONE_NEWNET)?;
         }
 
         let listen_socket = match self.sa_or_fd {
@@ -294,6 +294,10 @@ impl OptsPart {
     }
 
     fn connect(self) -> anyhow::Result<()> {
+        if let Some(ns) = self.ns {
+            setns(ns.0, CloneFlags::CLONE_NEWNET)?;
+        }
+
         let mut cmsg = cmsg_space!([RawFd; 1]);
 
         let (tx, rx) = flume::bounded(if self.oneshot { 1 } else { 16 });
@@ -321,6 +325,9 @@ impl OptsPart {
                 Some(&mut cmsg),
                 MsgFlags::empty(),
             )?;
+            if ret.bytes == 0 {
+                break;
+            }
             assert_eq!(ret.bytes, 1);
             assert_eq!(b[0], b'S');
             let mut incoming_socket = None;
@@ -371,6 +378,7 @@ fn forwarder(
             rt.block_on(async move {
                 loop {
                     let fd2 = rx.recv_async().await?;
+                    // Safety: user-specified file descriptor. Assuming operator cares not to specify iffy values.
                     let tcp2 = unsafe { std::net::TcpStream::from_raw_fd(fd2) };
                     tcp2.set_nonblocking(true)?;
                     tcp2.set_nodelay(true)?;
@@ -397,7 +405,9 @@ fn forwarder(
         Either::Right(fd) => {
             let fd2 = rx.recv()?;
             drop(rx);
+            // Safety: user-specified file descriptor. Assuming operator cares not to specify iffy values.
             let tcp1 = unsafe { std::net::TcpStream::from_raw_fd(fd) };
+            // Safety: result of `accept(2)` or a user-specific FD.
             let tcp2 = unsafe { std::net::TcpStream::from_raw_fd(fd2) };
             tcp1.set_nonblocking(true)?;
             tcp2.set_nonblocking(true)?;
@@ -425,7 +435,9 @@ fn main() -> anyhow::Result<()> {
 
     let (listen_opts, connect_opts) = opts2.split()?;
 
+    // Safety: no multi-threaded things happening before this point, so should be OK.
     let fr = unsafe { fork()? };
+
     match fr {
         ForkResult::Parent { child } => {
             // listener
