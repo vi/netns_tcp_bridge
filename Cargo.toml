@@ -2,8 +2,11 @@
 name = "netns_tcp_bridge"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+categories = ["command-line-utilities", "network-programming"]
+keywords = ["netns", "linux", "namespaces", "tcp", "forwarder"]
+description = "Linux CLI tool to forward TCP connections from one network namespace to another network namespace"
+repository = "https://github.com/vi/netns_tcp_bridge"
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 anyhow = { version = "1.0.59" }
