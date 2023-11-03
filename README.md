@@ -8,7 +8,7 @@ It is somewhat analogous to using a pair of [socat][s]s, each in different netns
 * `socat tcp-l:1234,fork,reuseaddr unix:/path/to/unix-socket-shared-between-namespaces.sock`
 * `socat unix-listen:/path/to/unix-socket-shared-between-namespaces.sock tcp:127.0.0.1:1234`
 
-It works forking into two processes: listener and connector and by passing (`SCM_RIGHTS`) connected sockets from listener over a `socketpair(2)` to the connector process. Each part can be moved into each own network namespace.
+It works by forking into two processes: listener and connector and by passing (`SCM_RIGHTS`) connected sockets from listener over a `socketpair(2)` to the connector process. Each part can be moved into each own network namespace.
 
 Build it with `cargo build --release` or download it from [Github releases][gr].
 
