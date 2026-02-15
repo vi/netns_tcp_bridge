@@ -9,7 +9,7 @@ repository = "https://github.com/vi/netns_tcp_bridge"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-anyhow = { version = "1.0.59" }
+anyhow = { version = "1.0.59", default-features=false }
 either = "1.7.0"
 flume = { version = "0.10.14", default-features = false, features=["async"]}
 gumdrop = "0.8.1"
