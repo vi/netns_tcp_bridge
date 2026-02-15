@@ -290,6 +290,9 @@ impl OptsPart {
                 None,
             )?;
             assert_eq!(ret, 1);
+            if close(s).is_err() {
+                eprintln!("Failed to close an accepted socket after sending it");
+            }
         }
     }
 
